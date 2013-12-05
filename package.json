@@ -1,6 +1,6 @@
 {
 	"name": "nodebb-plugin-sanitizehtml",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "An HTML Sanitizer parser for NodeBB",
 	"main": "index.js",
 	"scripts": {
