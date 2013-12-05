@@ -42,7 +42,7 @@ var	sanitizeHtml = require('sanitize-html'),
 						var noop = function (c){return c;};
 						try {
 							// Function.apply(context, args (csv string), function-code (string))
-							obj = Function.apply( _self, ['content, $', options[idx] ? options[idx] + '\nreturn content;' : defaultsGlobal.parseAgain]);
+							obj = Function.apply( _self, ['content, $', (options[idx] ? options[idx] : defaultsGlobal.parseAgain) + '\nreturn content;' ]);
 
 						} catch (e) {
 							console.log('[nodebb-plugin-sanitizehtml] e2: ' + e + ' can\'t parse function "' + field + '" falling back to noop.');
