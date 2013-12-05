@@ -1,6 +1,7 @@
 <!-- todo: move this out! -->
 <style>
-	input {
+	input[type='text'],
+	textarea {
 		display: block;
 		width: 100%;
 	}
@@ -63,6 +64,42 @@
 				<pre>[ "img", "br", "hr", "area", "base","basefont", "input", "link", "meta" ]</pre>
 			</p>
 		</div>
+
+<!-- dafuq is dis chit? -->
+<label for="advancedShown">
+<input type="checkbox" onclick="$('label[for=\'parseAgain\']').parent().toggle();" style="display:inline-block"/>
+Show Advanced Option
+</label>
+
+<div class='nodebb-plugin-sanitizehtml-option' style='display:none;'>
+<label for='parseAgain' >
+An extra parse function to be called on the content
+<pre>
+// this is a function that mutates the content even more, as the last call before showing the post
+// modify the 'content' string at will, then return it
+
+// complete this function's body, and only the body
+// (however you can 'return' early - just don't close the function block)
+// !! if unsure, leave blank
+// if your syntax is invalid, it will be ignored.
+
+
+// context: null
+// arguments: content -> a string, $ THE jquery cuz i'm nice
+// note: remember this is executing on the server side, so don't compute heavy stuff, and there is no window object
+
+</pre>
+<pre>
+var parseAgain = function (content, $) {
+</pre>
+<textarea data-field='nodebb-plugin-sanitizehtml:options:parseAgain' id='parseAgain'>
+</textarea>
+<pre>
+  return content;
+};
+</pre>
+</label>
+
         <br />
 		<p>If you're not sure what to do, don't change them, or refer to the <a href="https://github.com/punkave/sanitize-html" target="_blank">sanitize-html readme</a> for more details.
 

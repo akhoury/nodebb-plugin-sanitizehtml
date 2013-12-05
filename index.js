@@ -2,12 +2,17 @@ var	sanitizeHtml = require('sanitize-html'),
 	fse = require('fs-extra'),
 	path = require('path'),
 	async = require('async'),
+	$ = require('jquery'),
+
 	RDB = module.parent.require('./redis'),
+
 	defaultsGlobal = {
 		allowedTags: '[ "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol", "nl", "li", "b", "i", "strong", "em", "strike", "code", "hr", "br", "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre" ]',
 		allowedAttributes: '{"a": [ "href", "name", "target" ], "img": ["src"] }',
-		selfClosing: '[ "img", "br", "hr", "area", "base","basefont", "input", "link", "meta" ]'
+		selfClosing: '[ "img", "br", "hr", "area", "base","basefont", "input", "link", "meta" ]',
+		parseAgain: ''
 	},
+
 	SanitizeHtml = {
 		config: {},
 		init: function() {
@@ -16,7 +21,8 @@ var	sanitizeHtml = require('sanitize-html'),
 				fields = [
 					'allowedTags',
 					'allowedAttributes',
-					'selfClosing'
+					'selfClosing',
+					'parseAgain'
 				],
 				hashes = fields.map(function(field) { return 'nodebb-plugin-sanitizehtml:options:' + field });
 
@@ -24,12 +30,32 @@ var	sanitizeHtml = require('sanitize-html'),
 
 				fields.forEach(function(field, idx) {
 					var obj;
-					options[idx] = options[idx] == 'undefined' /* redis wat */ || !options[idx] ? idx == 1 ? '{}' : '[]' : options[idx];
-					try {
-						obj = JSON.parse(options[idx]);
-					} catch (e) {
-					    console.log('[nodebb-plugin-sanitizehtml] e1: ' + e + ' can\'t parse option ' + field + ' falling back to default.');
-						obj = JSON.parse(defaultsGlobal[field]);
+					if (field !== 'parseAgain') {
+						options[idx] = options[idx] == 'undefined' /* redis wat */ || !options[idx] ? idx == 1 ? '{}' : '[]' : options[idx];
+						try {
+							obj = JSON.parse(options[idx]);
+						} catch (e) {
+							console.log('[nodebb-plugin-sanitizehtml] e1: ' + e + ' can\'t parse option ' + field + ' falling back to default.');
+							obj = JSON.parse(defaultsGlobal[field]);
+						}
+					} else {
+						var noop = function (c){return c;};
+						try {
+							// Function.apply(context, args (csv string), function-code (string))
+							obj = Function.apply( _self, ['content, $', options[idx] ? options[idx] + '\nreturn content;' : defaultsGlobal.parseAgain]);
+
+						} catch (e) {
+							console.log('[nodebb-plugin-sanitizehtml] e2: ' + e + ' can\'t parse function "' + field + '" falling back to noop.');
+							obj = noop;
+						}
+						// let's see if it doesn't crash
+						try {
+							obj("test", $, "1", "2", "3");
+						} catch (e) {
+							// if it did, then too bad, you had a good run, but no thanks
+							console.log('[nodebb-plugin-sanitizehtml] e3: ' + e + ' | parseAgain code:[start] ' + obj + ' [end] has error, falling back to noop.');
+							obj = noop;
+						}
 					}
 					options[idx] = obj;
 					_self.config[field] = options[idx];
@@ -45,7 +71,7 @@ var	sanitizeHtml = require('sanitize-html'),
 				.replace(/&#039;/g, "'");
 		},
 		sanitize: function(raw) {
-			return sanitizeHtml(this.unescapeHtml(raw), this.config);
+			return this.config.parseAgain(sanitizeHtml(this.unescapeHtml(raw), this.config), $);
 		},
 		reload: function(hookVals) {
 			var	isSanitizeHtmlPlugin = /^nodebb-plugin-sanitizehtml:options:allowedTags/;
@@ -88,7 +114,8 @@ var	sanitizeHtml = require('sanitize-html'),
 						defaults = [
 							{ field: 'allowedTags', value: defaultsGlobal.allowedTags },
 							{ field: 'allowedAttributes', value: defaultsGlobal.allowedAttributes },
-							{ field: 'selfClosing', value: defaultsGlobal.selfClosing }
+							{ field: 'selfClosing', value: defaultsGlobal.selfClosing },
+							{ field: 'parseAgain', value: defaultsGlobal.parseAgain }
 						];
 
 					async.each(defaults, function(optObj, next) {
