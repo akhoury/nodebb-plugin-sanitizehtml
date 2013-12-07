@@ -4,7 +4,7 @@ var	sanitizeHtml = require('sanitize-html'),
 	async = require('async'),
 	$ = require('jquery'),
 
-	RDB = module.parent.require('./redis'),
+	meta = module.parent.require('./meta'),
 
 	defaultsGlobal = {
 		allowedTags: '[ "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol", "nl", "li", "b", "i", "strong", "em", "strike", "code", "hr", "br", "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre" ]',
@@ -26,7 +26,7 @@ var	sanitizeHtml = require('sanitize-html'),
 				],
 				hashes = fields.map(function(field) { return 'nodebb-plugin-sanitizehtml:options:' + field });
 
-			RDB.hmget('config', hashes, function(err, options) {
+			meta.getFields('config', hashes, function(err, options) {
 
 				fields.forEach(function(field, idx) {
 					var obj;
@@ -110,8 +110,7 @@ var	sanitizeHtml = require('sanitize-html'),
 			},
 			activate: function(id) {
 				if (id === 'nodebb-plugin-sanitizehtml') {
-					var	Meta = module.parent.require('./meta'),
-						defaults = [
+					var defaults = [
 							{ field: 'allowedTags', value: defaultsGlobal.allowedTags },
 							{ field: 'allowedAttributes', value: defaultsGlobal.allowedAttributes },
 							{ field: 'selfClosing', value: defaultsGlobal.selfClosing },
@@ -120,7 +119,7 @@ var	sanitizeHtml = require('sanitize-html'),
 
 					async.each(defaults, function(optObj, next) {
 						console.log(optObj.value);
-						Meta.configs.setOnEmpty('nodebb-plugin-sanitizehtml:options:' + optObj.field, optObj.value, next);
+						meta.configs.setOnEmpty('nodebb-plugin-sanitizehtml:options:' + optObj.field, optObj.value, next);
 					});
 				}
 			}
