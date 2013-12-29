@@ -9,3 +9,6 @@ if you're using [nodebb-plugin-markdown](https://github.com/julianlam/nodebb-plu
 ### install
 
 ```npm install nodebb-plugin-sanitizehtml```
+
+### NodeBB Version
+tested with NodeBB 0.2.0

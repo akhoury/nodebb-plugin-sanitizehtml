@@ -35,21 +35,21 @@
 		<div class="nodebb-plugin-sanitizehtml-option">
 			<label for='allowedTags'>
 				This is an <i>Array</i> of allowed tags
-				<input placeholder='leave blank or [ ] for none' type='text' data-field='nodebb-plugin-sanitizehtml:options:allowedTags' id='allowedTags'/>
+				<input class='form-control' placeholder='leave blank or [ ] for none' type='text' data-field='nodebb-plugin-sanitizehtml:options:allowedTags' id='allowedTags'/>
 			</label>
 			<p>
-				if invalid entry default is:
-				<pre>[ "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol", "nl", "li", "b", "i", "strong", "em", "strike", "code", "hr", "br", "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre" ]</pre>
+				if invalid entry, default is:
+				<pre>[ "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol", "nl", "li", "b", "img", "i", "strong", "em", "strike", "code", "hr", "br", "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre" ]</pre>
 			</p>
 		</div>
 
 		<div class="nodebb-plugin-sanitizehtml-option">
 			<label for='allowedAttributes'>
 				This is an <i>Object</i> of allowed attributes of each each allowed tags
-				<input placeholder='leave blank or { } for none' type='text' data-field='nodebb-plugin-sanitizehtml:options:allowedAttributes' id='allowedAttributes' />
+				<input class='form-control' placeholder='leave blank or { } for none' type='text' data-field='nodebb-plugin-sanitizehtml:options:allowedAttributes' id='allowedAttributes' />
 			</label>
 			<p>
-				if invalid entry default is:
+				if invalid entry, default is:
 				<pre>{"a": [ "href", "name", "target" ], "img": ["src"] }</pre>
 			</p>
 		</div>
@@ -57,10 +57,10 @@
 		<div class="nodebb-plugin-sanitizehtml-option">
 			<label for='selfClosing'>
 				This is an <i>Array</i> of self closing option of each allowed tag
-				<input placeholder='leave blank or [ ] for none' type='text'  data-field='nodebb-plugin-sanitizehtml:options:selfClosing' id='selfClosing' />
+				<input class='form-control' placeholder='leave blank or [ ] for none' type='text'  data-field='nodebb-plugin-sanitizehtml:options:selfClosing' id='selfClosing' />
 			</label>
 			<p>
-				if invalid entry default is:
+				if invalid entry, default is:
 				<pre>[ "img", "br", "hr", "area", "base","basefont", "input", "link", "meta" ]</pre>
 			</p>
 		</div>
@@ -84,15 +84,18 @@ An extra parse function to be called on the content
 // if your syntax is invalid, it will be ignored.
 
 
-// context: null
-// arguments: content -> a string, $ THE jquery cuz i'm nice
+// @Context: null
+// @Arguments:
+      {content} just a String
+      {$} THE jQuery, cuz i'm nice
+
 // note: remember this is executing on the server side, so don't compute heavy stuff, and there is no window object
 
 </pre>
 <pre>
 var parseAgain = function (content, $) {
 </pre>
-<textarea data-field='nodebb-plugin-sanitizehtml:options:parseAgain' id='parseAgain'>
+<textarea class='form-control' data-field='nodebb-plugin-sanitizehtml:options:parseAgain' id='parseAgain'>
 </textarea>
 <pre>
   return content;
