@@ -97,12 +97,12 @@ var	sanitizeHtml = require('sanitize-html'),
 				value = meta.config[field];
 
 				var obj;
-				if (field !== 'parseAgain') {
+				if (option !== 'parseAgain') {
 					obj = value == 'undefined' /* redis wat */ || !value ? option == 'allowedAttributes' ? '{}' : '[]' : value;
 					try {
 						obj = JSON.parse(obj);
 					} catch (e) {
-						log.debug('e1: ' + e + ' can\'t parse option ' + field + ' falling back to default.');
+						log.warn('e1: ' + e + ' can\'t JSON.parse option: ' + option + ' value: ' + obj + ' falling back to default.');
 						obj = JSON.parse(pluginData.defaults[option]);
 					}
 				} else {
