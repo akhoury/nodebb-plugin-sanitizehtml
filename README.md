@@ -9,7 +9,7 @@ if you're using [nodebb-plugin-markdown](https://github.com/julianlam/nodebb-plu
 ![Imgur](http://i.imgur.com/b6ielAT.png)
 
 ### Don't forget to shut off Markdown's HTML Sanitize
-![Imgur](http://i.imgur.com/4Udr38L)
+![Imgur](http://i.imgur.com/4Udr38L.png)
 
 
 ### install
