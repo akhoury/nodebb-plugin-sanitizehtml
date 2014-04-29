@@ -4,20 +4,18 @@
 	"description": "An HTML Sanitizer parser for NodeBB",
 	"url": "https://github.com/akhoury/nodebb-plugin-sanitizehtml",
 	"library": "./index.js",
-	"staticDir": "./public",
-	"css": [
-		"css/default.css"
-	],
-	"hooks": [
-		{ "hook": "filter:post.parse", "method": "sanitize", "priority": 5 },
-		{ "hook": "filter:post.parseSignature", "method": "sanitize", "priority": 5 },
-		{ "hook": "filter:admin.header.build", "method": "admin.menu", "callbacked": false },
-		{ "hook": "filter:admin.create_routes", "method": "admin.route", "callbacked": true },
-		{ "hook": "action:plugin.activate", "method": "admin.activate" },
-		{ "hook": "action:config.set", "method": "reload" }
-	],
-
-	"defaults": {
+    "templates": "./public/templates",
+    "hooks": [
+        {"hook": "filter:post.parse", "method": "sanitize"},
+        {"hook": "filter:post.parseSignature", "method": "sanitize"},
+        {"hook": "filter:composer.help", "method": "renderHelp"},
+        {"hook": "filter:admin.header.build", "method": "admin.menu"},
+        {"hook": "action:app.load", "method": "onLoad"},
+        {"hook": "action:plugin.activate", "method": "admin.activate"}
+    ],
+    "minver": "0.4.0",
+    "faIcon": "fa-edit",
+	"defaultConfigs": {
 		"allowedTags": "[ \"h3\", \"h4\", \"h5\", \"h6\", \"blockquote\", \"p\", \"a\", \"ul\", \"ol\", \"nl\", \"li\", \"b\", \"img\", \"i\", \"strong\", \"em\", \"strike\", \"code\", \"hr\", \"br\", \"div\", \"table\", \"thead\", \"caption\", \"tbody\", \"tr\", \"th\", \"td\", \"pre\" ]",
 		"allowedAttributes": "{\"a\": [ \"href\", \"name\", \"target\" ], \"img\": [\"src\"] }",
 		"selfClosing": "[ \"img\", \"br\", \"hr\", \"area\", \"base\",\"basefont\", \"input\", \"link\", \"meta\" ]",

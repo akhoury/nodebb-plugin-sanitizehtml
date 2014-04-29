@@ -1,151 +1,146 @@
 var	sanitizeHtml = require('sanitize-html'),
-	fs = require('fs-extra'),
-	pluginData = require('./plugin.json'),
-	path = require('path'),
-	async = require('async'),
-	log = require('tiny-logger').init(process.env.NODE_ENV === 'development' ? 'debug' : 'info,warn,error', '[' + pluginData.id + ']'),
-	$ = require('jquery'),
-	meta = module.parent.require('./meta');
+    fs = require('fs-extra'),
+    pluginData = require('./plugin.json'),
+    path = require('path'),
+    async = require('async'),
+    $ = require('jquery'),
+    winston = module.parent.require('winston'),
+    meta = module.parent.require('./meta'),
+    Plugin;
 
-(function(Plugin){
-	Plugin.config = {};
+pluginData.nbbId = pluginData.id.replace(/nodebb-plugin-/, '');
 
-	Plugin.init = function(callback){
-		log.debug('init()');
-		var _self = this,
-			hashes = Object.keys(pluginData.defaults).map(function(field) { return pluginData.id + ':options:' + field });
+Plugin = {
 
-		meta.configs.getFields(hashes, function(err, options){
-			if (err) throw err;
+    config: {},
 
-			for (field in options) {
-				meta.config[field] = options[field];
-			}
-			if (typeof _self.softInit == 'function') {
-				_self.softInit(callback);
-			} else if (typeof callback == 'function'){
-				callback();
-			}
+    onLoad: function (app, middleware, controllers) {
+        function render(req, res, next) {
+            res.render('admin/plugins/' + pluginData.nbbId, pluginData);
+        }
 
-		});
-	};
+        app.get('/admin/plugins/' + pluginData.nbbId, middleware.admin.buildHeader, render);
+        app.get('/api/admin/plugins/' + pluginData.nbbId, render);
+    },
 
-	Plugin.reload = function(hookVals) {
-		var	isThisPlugin = new RegExp(pluginData.id + ':options:' + Object.keys(pluginData.defaults)[0]);
-		if (isThisPlugin.test(hookVals.key)) {
-			this.init(this.softInit.bind(this));
-		}
-	};
+    init: function () {
 
-	Plugin.admin = {
-		menu: function(custom_header) {
-			custom_header.plugins.push({
-				"route": '/plugins/' + pluginData.name,
-				"icon": 'icon-edit',
-				"name": pluginData.name
-			});
+        // Load saved config
+        var defaults = pluginData.defaultConfigs,
+            fields = Object.keys(defaults);
 
-			return custom_header;
-		},
-		route: function(custom_routes, callback) {
-			fs.readFile(path.join(__dirname, 'public/templates/admin.tpl'), function(err, tpl) {
-				if (err) throw err;
+        meta.settings.get(pluginData.nbbId, function (err, options) {
+            fields.forEach(function(field, i) {
 
-				custom_routes.routes.push({
-					route: '/plugins/' + pluginData.name,
-					method: "get",
-					options: function(req, res, callback) {
-						callback({
-							req: req,
-							res: res,
-							route: '/plugins/' + pluginData.name,
-							name: Plugin,
-							content: tpl
-						});
-					}
-				});
+                var savedValue = options[field],
+                    defaultValue = defaults[field],
+                    obj;
 
-				callback(null, custom_routes);
-			});
-		},
-		activate: function(id) {
-			log.debug('activate()');
-			if (id === pluginData.id) {
-				async.each(Object.keys(pluginData.defaults), function(field, next) {
-					meta.configs.setOnEmpty(pluginData.id + ':options:' + field, pluginData.defaults[field], next);
-				});
-			}
-		}
-	};
+                if (field !== 'parseAgain') {
+                    obj = !savedValue ? field === 'allowedAttributes' ? '{}' : '[]' : savedValue;
+                    try {
+                        obj = JSON.parse(obj);
+                    } catch (e) {
+                        winston.warn('[plugins/' + pluginData.nbbId + '] e1: ' + e + ' can\'t JSON.parse option: ' + field + ' value: ' + obj + ' falling back to default.');
+                        obj = JSON.parse(defaultValue);
+                    }
+                } else {
+                    var noop = function (c) {
+                        return c;
+                    };
+                    try {
+                        // Function.apply(context, args (csv string), function-code (string))
+                        obj = Function.apply(Plugin, ['content, $', (savedValue ? savedValue : defaultValue) + '\nreturn content;' ]);
 
-	Plugin.softInit = function(callback) {
-		log.debug('softInit()');
+                    } catch (e) {
+                        winston.warn('[plugins/' + pluginData.nbbId + '] e2: ' + e + ' can\'t parse function "' + field + '" falling back to noop.');
+                        obj = noop;
+                    }
+                    // let's see if it doesn't crash
+                    try {
+                        obj("test", $, "1", "2", "3");
+                    } catch (e) {
+                        // if it did, then too bad, you had a good run, but no thanks
+                        winston.warn('[plugins/' + pluginData.nbbId + '] e3: ' + e + ' | parseAgain code:[start] ' + obj + ' [end] has error, falling back to noop.');
+                        obj = noop;
+                    }
+                }
+                Plugin.config[field] = obj;
+            });
+        });
+    },
 
-		var	_self = this;
+    sanitize: function (raw, callback) {
+        callback(null, Plugin.config.parseAgain(sanitizeHtml(Plugin.unescapeHtml(raw), Plugin.config), $));
+    },
 
-		if (!meta.config) {
-			this.init(callback);
-		}
+    unescapeHtml: function (unsafe) {
+        return unsafe
+            .replace(/&amp;/g, "&")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&quot;/g, "\"")
+            .replace(/&#039;/g, "'");
+    },
 
-		var prefix = pluginData.id + ':options:';
-		Object.keys(meta.config).forEach(function(field, i) {
-			var option, value;
-			if (field.indexOf(pluginData.id + ':options:') === 0 ) {
+    renderHelp: function (helpContent, callback) {
+        helpContent += "<h2>HTML</h2>"
+            + "<p>You can still use safe HTML</p>"
+            + (function () {
+                var allowedTags = "<h3>Allowed Tags</h3>";
+                allowedTags += "<p>";
+                (Plugin.config.allowedTags || []).forEach(function (tag, i) {
+                    if (i > 0) {
+                        allowedTags += ", ";
+                    }
 
-				option = field.slice(prefix.length);
+                    allowedTags += tag
+                });
+                allowedTags += "</p>";
+                return allowedTags;
+            })()
+            + (function () {
+                var allowedAttributes = "<h3>Allowed Attributes</h3>";
+                allowedAttributes += "<p>";
+                Object.keys(Plugin.config.allowedAttributes).forEach(function (tag, i) {
+                    if (i > 0) {
+                        allowedAttributes += ", ";
+                    }
 
-				value = meta.config[field];
+                    Object.keys(tag).forEach(function (attr, j) {
+                        if (j > 0) {
+                            allowedAttributes += ", ";
+                        }
+                        allowedAttributes += tag + "." + attr;
+                    });
+                });
+                allowedAttributes += "</p>";
+                return allowedAttributes;
+            })();
 
-				var obj;
-				if (option !== 'parseAgain') {
-					obj = value == 'undefined' /* redis wat */ || !value ? option == 'allowedAttributes' ? '{}' : '[]' : value;
-					try {
-						obj = JSON.parse(obj);
-					} catch (e) {
-						log.warn('e1: ' + e + ' can\'t JSON.parse option: ' + option + ' value: ' + obj + ' falling back to default.');
-						obj = JSON.parse(pluginData.defaults[option]);
-					}
-				} else {
-					var noop = function (c){return c;};
-					try {
-						// Function.apply(context, args (csv string), function-code (string))
-						obj = Function.apply( _self, ['content, $', (value ? value : pluginData.defaults['parseAgain']) + '\nreturn content;' ]);
+        callback(null, helpContent);
+    },
+    admin: {
+        menu: function (custom_header, callback) {
+            custom_header.plugins.push({
+                "route": '/plugins/' + pluginData.nbbId,
+                "icon": pluginData.faIcon,
+                "name": pluginData.name
+            });
 
-					} catch (e) {
-						log.debug('e2: ' + e + ' can\'t parse function "' + field + '" falling back to noop.');
-						obj = noop;
-					}
-					// let's see if it doesn't crash
-					try {
-						obj("test", $, "1", "2", "3");
-					} catch (e) {
-						// if it did, then too bad, you had a good run, but no thanks
-						log.debug('e3: ' + e + ' | parseAgain code:[start] ' + obj + ' [end] has error, falling back to noop.');
-						obj = noop;
-					}
-				}
-				_self.config[option] = obj;
-			}
-		});
-		_self.initialized = true;
-		if (typeof callback == 'function') {
-			callback();
-		}
-	};
+            callback(null, custom_header);
+        },
+        activate: function (id) {
+            if (id === 'nodebb-plugin-' + pluginData.nbbId) {
+                var defaults = pluginData.defaultConfigs;
 
-	Plugin.unescapeHtml = function(unsafe) {
-		return unsafe
-			.replace(/&amp;/g, "&")
-			.replace(/&lt;/g, "<")
-			.replace(/&gt;/g, ">")
-			.replace(/&quot;/g, "\"")
-			.replace(/&#039;/g, "'");
-	};
+                async.each(defaults, function (optObj, next) {
+                    meta.settings.setOnEmpty(pluginData.nbbId, optObj.field, optObj.value, next);
+                });
+            }
+        }
+    }
+};
 
-	Plugin.sanitize = function(raw) {
-		return this.config.parseAgain(sanitizeHtml(this.unescapeHtml(raw), this.config), $);
-	};
-
-	Plugin.init();
-
-})(exports);
+Plugin.init();
+module.exports = Plugin;
