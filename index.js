@@ -84,39 +84,42 @@ Plugin = {
     },
 
     renderHelp: function (helpContent, callback) {
-        helpContent += "<h2>HTML</h2>"
-            + "<p>You can still use safe HTML</p>"
+        helpContent += "<h2>Sanitized HTML</h2>"
+            + "<p>You can still use safe HTML, provided by <a href='https://github.com/akhoury/nodebb-plugin-sanitizehtml'>nodebb-plugin-sanitizehtml</a></p>"
             + (function () {
-                var allowedTags = "<h3>Allowed Tags</h3>";
-                allowedTags += "<p>";
-                (Plugin.config.allowedTags || []).forEach(function (tag, i) {
+                var allowedTags = "<h4>&nbsp;Allowed Tags</h4>";
+                allowedTags += "<p class='text-muted'>&nbsp;&nbsp;";
+                Plugin.config.allowedTags.forEach(function (tag, i) {
                     if (i > 0) {
                         allowedTags += ", ";
                     }
 
                     allowedTags += tag
                 });
+                allowedTags += !Plugin.config.allowedTags.length ? "No HTML tags allowed" : "";
                 allowedTags += "</p>";
                 return allowedTags;
             })()
             + (function () {
-                var allowedAttributes = "<h3>Allowed Attributes</h3>";
-                allowedAttributes += "<p>";
-                Object.keys(Plugin.config.allowedAttributes).forEach(function (tag, i) {
+                var allowedAttributes = "<h4>&nbsp;Allowed Attributes</h4>";
+                allowedAttributes += "<p class='text-muted'>&nbsp;&nbsp;";
+                var keys = Object.keys(Plugin.config.allowedAttributes || {});
+                keys.forEach(function (tagName, i) {
                     if (i > 0) {
                         allowedAttributes += ", ";
                     }
-
-                    Object.keys(tag).forEach(function (attr, j) {
+                    var tag = Plugin.config.allowedAttributes[tagName];
+                    tag.forEach(function (attr, j) {
                         if (j > 0) {
                             allowedAttributes += ", ";
                         }
-                        allowedAttributes += tag + "." + attr;
+                        allowedAttributes += tagName + "." + attr;
                     });
                 });
                 allowedAttributes += "</p>";
                 return allowedAttributes;
-            })();
+            })()
+            + "<p class='text-warning'>&nbsp;Eveything else will be sanitized</p>";
 
         callback(null, helpContent);
     },
