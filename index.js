@@ -26,7 +26,7 @@ Plugin = {
     init: function () {
 
         // Load saved config
-        var defaults = pluginData.defaultConfigs,
+        var defaults = pluginData.defaultSettings,
             fields = Object.keys(defaults);
 
         meta.settings.get(pluginData.nbbId, function (err, options) {
@@ -135,7 +135,7 @@ Plugin = {
         },
         activate: function (id) {
             if (id === 'nodebb-plugin-' + pluginData.nbbId) {
-                var defaults = pluginData.defaultConfigs;
+                var defaults = pluginData.defaultSettings;
 
                 async.each(defaults, function (optObj, next) {
                     meta.settings.setOnEmpty(pluginData.nbbId, optObj.field, optObj.value, next);
