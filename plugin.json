@@ -6,8 +6,8 @@
 	"library": "./index.js",
     "templates": "./public/templates",
     "hooks": [
-        {"hook": "filter:post.parse", "method": "sanitize"},
-        {"hook": "filter:post.parseSignature", "method": "sanitize"},
+        {"hook": "filter:post.parse", "method": "sanitize", "priority": -999999},
+        {"hook": "filter:post.parseSignature", "method": "sanitize", "priority": -999999},
         {"hook": "filter:composer.help", "method": "renderHelp"},
         {"hook": "filter:admin.header.build", "method": "admin.menu"},
         {"hook": "action:app.load", "method": "onLoad"},
