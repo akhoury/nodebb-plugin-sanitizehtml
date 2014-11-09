@@ -12,18 +12,43 @@ pluginData.nbbId = pluginData.id.replace(/nodebb-plugin-/, '');
 
 Plugin = {
 
+    settings: function(settings, callback) {
+        if (typeof settings === 'function') {
+            callback = settings;
+            settings = undefined;
+        }
+        if (typeof callback !== 'function') {
+            callback = function(){};
+        }
+        if (settings) {
+            meta.settings.set(pluginData.nbbId, settings, callback);
+        } else {
+            meta.settings.get(pluginData.nbbId, function(err, config) {
+                if (err) {
+                    winston.warn('[plugins/' + pluginData.nbbId + '] Settings are not set or could not be retrieved!');
+                    return callback(err);
+                }
+
+                Plugin.config = config;
+                callback(null, config);
+            });
+        }
+    },
+
     config: {},
 
-    onLoad: function (app, middleware, controllers) {
+    onLoad: function (app, middleware, controllers, callback) {
         function render(req, res, next) {
             res.render('admin/plugins/' + pluginData.nbbId, pluginData);
         }
 
-        app.get('/admin/plugins/' + pluginData.nbbId, middleware.admin.buildHeader, render);
-        app.get('/api/admin/plugins/' + pluginData.nbbId, render);
+        app.get('/admin/plugins/' + pluginData.nbbId, middleware.applyCSRF, middleware.admin.buildHeader, render);
+        app.get('/api/admin/plugins/' + pluginData.nbbId, middleware.applyCSRF, render);
+
+        Plugin.init(callback);
     },
 
-    init: function () {
+    init: function(callback) {
 
         // Load saved config
         var defaults = pluginData.defaultSettings,
@@ -67,11 +92,15 @@ Plugin = {
                 }
                 Plugin.config[field] = obj;
             });
+
+            if (typeof callback === 'function') {
+                callback();
+            }
         });
     },
 
     sanitize: function (raw, callback) {
-        callback(null, Plugin.config.parseAgain(sanitizeHtml(Plugin.unescapeHtml(raw), Plugin.config), $));
+        callback(null, Plugin.config.parseAgain(sanitizeHtml(Plugin.unescapeHtml(raw || ''), Plugin.config), $));
     },
 
     unescapeHtml: function (unsafe) {
@@ -85,41 +114,41 @@ Plugin = {
 
     renderHelp: function (helpContent, callback) {
         helpContent += "<h2>Sanitized HTML</h2>"
-            + "<p>You can still use safe HTML, provided by <a href='https://github.com/akhoury/nodebb-plugin-sanitizehtml'>nodebb-plugin-sanitizehtml</a></p>"
-            + (function () {
-                var allowedTags = "<h4>&nbsp;Allowed Tags</h4>";
-                allowedTags += "<p class='text-muted'>&nbsp;&nbsp;";
-                Plugin.config.allowedTags.forEach(function (tag, i) {
-                    if (i > 0) {
-                        allowedTags += ", ";
-                    }
+        + "<p>You can still use safe HTML, provided by <a href='https://github.com/akhoury/nodebb-plugin-sanitizehtml'>nodebb-plugin-sanitizehtml</a></p>"
+        + (function () {
+            var allowedTags = "<h4>&nbsp;Allowed Tags</h4>";
+            allowedTags += "<p class='text-muted'>&nbsp;&nbsp;";
+            Plugin.config.allowedTags.forEach(function (tag, i) {
+                if (i > 0) {
+                    allowedTags += ", ";
+                }
 
-                    allowedTags += tag
-                });
-                allowedTags += !Plugin.config.allowedTags.length ? "No HTML tags allowed" : "";
-                allowedTags += "</p>";
-                return allowedTags;
-            })()
-            + (function () {
-                var allowedAttributes = "<h4>&nbsp;Allowed Attributes</h4>";
-                allowedAttributes += "<p class='text-muted'>&nbsp;&nbsp;";
-                var keys = Object.keys(Plugin.config.allowedAttributes || {});
-                keys.forEach(function (tagName, i) {
-                    if (i > 0) {
+                allowedTags += tag
+            });
+            allowedTags += !Plugin.config.allowedTags.length ? "No HTML tags allowed" : "";
+            allowedTags += "</p>";
+            return allowedTags;
+        })()
+        + (function () {
+            var allowedAttributes = "<h4>&nbsp;Allowed Attributes</h4>";
+            allowedAttributes += "<p class='text-muted'>&nbsp;&nbsp;";
+            var keys = Object.keys(Plugin.config.allowedAttributes || {});
+            keys.forEach(function (tagName, i) {
+                if (i > 0) {
+                    allowedAttributes += ", ";
+                }
+                var tag = Plugin.config.allowedAttributes[tagName];
+                tag.forEach(function (attr, j) {
+                    if (j > 0) {
                         allowedAttributes += ", ";
                     }
-                    var tag = Plugin.config.allowedAttributes[tagName];
-                    tag.forEach(function (attr, j) {
-                        if (j > 0) {
-                            allowedAttributes += ", ";
-                        }
-                        allowedAttributes += tagName + "." + attr;
-                    });
+                    allowedAttributes += tagName + "." + attr;
                 });
-                allowedAttributes += "</p>";
-                return allowedAttributes;
-            })()
-            + "<p class='text-warning'>&nbsp;Eveything else will be sanitized</p>";
+            });
+            allowedAttributes += "</p>";
+            return allowedAttributes;
+        })()
+        + "<p class='text-warning'>&nbsp;Eveything else will be sanitized</p>";
 
         callback(null, helpContent);
     },
@@ -130,7 +159,6 @@ Plugin = {
                 "icon": pluginData.faIcon,
                 "name": pluginData.name
             });
-
             callback(null, custom_header);
         },
         activate: function (id) {
