@@ -37,7 +37,10 @@ Plugin = {
 
     config: {},
 
-    onLoad: function (app, middleware, controllers, callback) {
+    onLoad: function (params, callback) {
+		
+		var app = params.router, middleware = params.middleware;
+		
         function render(req, res, next) {
             res.render('admin/plugins/' + pluginData.nbbId, pluginData);
         }
@@ -99,10 +102,25 @@ Plugin = {
         });
     },
 
-    sanitize: function (raw, callback) {
-        callback(null, Plugin.config.parseAgain(sanitizeHtml(Plugin.unescapeHtml(raw || ''), Plugin.config), $));
+    sanitize: function (content) {
+		return Plugin.config.parseAgain(sanitizeHtml(Plugin.unescapeHtml(content || ''), Plugin.config), $);
     },
-
+	
+	sanitizeSave: function (post, callback) {
+		post.content = Plugin.sanitize(post.content);
+		callback(null, post);
+	},
+	
+	sanitizePost: function (data, callback) {
+		data.postData.content = Plugin.sanitize(data.postData.content);
+		callback(null, data);
+	},
+	
+	sanitizeSignature: function (data, callback) {
+		data.userData.signature = Plugin.sanitize(data.userData.signature);
+		callback(null, data);
+	},
+	
     unescapeHtml: function (unsafe) {
         return unsafe
             .replace(/&amp;/g, "&")

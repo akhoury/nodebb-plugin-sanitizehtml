@@ -6,14 +6,14 @@
   "library": "./index.js",
   "templates": "./public/templates",
   "hooks": [
-    {"hook": "filter:parse.raw", "method": "sanitize", "priority": -999999},
-    {"hook": "filter:post.parse", "method": "sanitize", "priority": -999999},
-    {"hook": "filter:post.parseSignature", "method": "sanitize", "priority": -999999},
+    {"hook": "filter:post.save", "method": "sanitizeSave", "priority": -999999},
+    {"hook": "filter:parse.post", "method": "sanitizePost", "priority": -999999},
+    {"hook": "filter:parse.signature", "method": "sanitizeSignature", "priority": -999999},
     {"hook": "filter:composer.help", "method": "renderHelp"},
     {"hook": "filter:admin.header.build", "method": "admin.menu"},
     {"hook": "static:app.load", "method": "onLoad"}
   ],
-  "compatibility": "~0.5.x",
+  "compatibility": "~0.6.x",
   "faIcon": "fa-edit",
   "defaultSettings": {
     "allowedTags": "[ \"h3\", \"h4\", \"h5\", \"h6\", \"blockquote\", \"p\", \"a\", \"ul\", \"ol\", \"nl\", \"li\", \"b\", \"img\", \"i\", \"strong\", \"em\", \"strike\", \"code\", \"hr\", \"br\", \"div\", \"table\", \"thead\", \"caption\", \"tbody\", \"tr\", \"th\", \"td\", \"pre\" ]",
