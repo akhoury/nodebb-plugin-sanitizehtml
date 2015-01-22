@@ -119,7 +119,7 @@
                             type: 'success',
                             alert_id: 'sanitizehtml-saved',
                             title: 'Reload Required',
-                            message: 'Please reload your NodeBB to have your changes take effect',
+                            message: 'Settings saved. Please reload your NodeBB to have your changes take effect',
                             clickfn: function() {
                                 socket.emit('admin.reload');
                             }
