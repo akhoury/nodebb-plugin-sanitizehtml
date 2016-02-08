@@ -38,9 +38,9 @@ Plugin = {
     config: {},
 
     onLoad: function (params, callback) {
-		
+
 		var app = params.router, middleware = params.middleware;
-		
+
         function render(req, res, next) {
             res.render('admin/plugins/' + pluginData.nbbId, pluginData);
         }
@@ -58,7 +58,8 @@ Plugin = {
             fields = Object.keys(defaults);
 
         meta.settings.get(pluginData.nbbId, function (err, options) {
-            fields.forEach(function(field, i) {
+
+			fields.forEach(function(field, i) {
 
                 var savedValue = options[field],
                     defaultValue = defaults[field],
@@ -66,12 +67,15 @@ Plugin = {
 
                 if (field !== 'parseAgain') {
                     obj = !savedValue ? field === 'allowedAttributes' ? '{}' : '[]' : savedValue;
-                    try {
-                        obj = JSON.parse(obj);
-                    } catch (e) {
-                        winston.warn('[plugins/' + pluginData.nbbId + '] e1: ' + e + ' can\'t JSON.parse option: ' + field + ' value: ' + obj + ' falling back to default.');
-                        obj = JSON.parse(defaultValue);
-                    }
+
+					if (obj && typeof obj == 'string') {
+						try {
+							obj = JSON.parse(obj);
+						} catch (e) {
+							winston.warn('[plugins/' + pluginData.nbbId + '] e1: ' + e + ' can\'t JSON.parse option: ' + field + ' value: ' + obj + ' falling back to default.');
+							obj = JSON.parse(defaultValue);
+						}
+					}
                 } else {
                     var noop = function (c) {
                         return c;
@@ -93,6 +97,7 @@ Plugin = {
                         obj = noop;
                     }
                 }
+
                 Plugin.config[field] = obj;
             });
 
@@ -105,22 +110,32 @@ Plugin = {
     sanitize: function (content) {
 		return Plugin.config.parseAgain(sanitizeHtml(Plugin.unescapeHtml(content || ''), Plugin.config), $);
     },
-	
+
 	sanitizeSave: function (post, callback) {
-		post.content = Plugin.sanitize(post.content);
+		if (post && post.content) {
+			post.content = Plugin.sanitize(post.content);
+		}
 		callback(null, post);
 	},
-	
+
 	sanitizePost: function (data, callback) {
-		data.postData.content = Plugin.sanitize(data.postData.content);
+		if (data && data.postData && data.postData.content) {
+			data.postData.content = Plugin.sanitize(data.postData.content);
+		}
 		callback(null, data);
 	},
-	
+
+	sanitizeRaw: function (raw, callback) {
+		callback(null, raw ? Plugin.sanitize(raw) : raw);
+	},
+
 	sanitizeSignature: function (data, callback) {
-		data.userData.signature = Plugin.sanitize(data.userData.signature);
+		if (data && data.userData && data.userData.signature) {
+			data.userData.signature = Plugin.sanitize(data.userData.signature);
+		}
 		callback(null, data);
 	},
-	
+
     unescapeHtml: function (unsafe) {
         return unsafe
             .replace(/&amp;/g, "&")

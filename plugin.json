@@ -6,17 +6,17 @@
   "library": "./index.js",
   "templates": "./public/templates",
   "hooks": [
-    {"hook": "filter:post.save", "method": "sanitizeSave", "priority": -999999},
-    {"hook": "filter:parse.post", "method": "sanitizePost", "priority": -999999},
-    {"hook": "filter:parse.signature", "method": "sanitizeSignature", "priority": -999999},
+    {"hook": "static:app.load", "method": "onLoad"},
+    {"hook": "filter:parse.post", "method": "sanitizePost", "priority": 1},
+    {"hook": "filter:parse.signature", "method": "sanitizeSignature", "priority": 1},
+    {"hook": "filter:parse.raw", "method": "sanitizeRaw", "priority": 1},
+    {"hook": "filter:post.save", "method": "sanitizeSave", "priority": 1},
     {"hook": "filter:composer.help", "method": "renderHelp"},
-    {"hook": "filter:admin.header.build", "method": "admin.menu"},
-    {"hook": "static:app.load", "method": "onLoad"}
+    {"hook": "filter:admin.header.build", "method": "admin.menu"}
   ],
-  "compatibility": "~0.6.x",
   "faIcon": "fa-edit",
   "defaultSettings": {
-    "allowedTags": "[ \"h3\", \"h4\", \"h5\", \"h6\", \"blockquote\", \"p\", \"a\", \"ul\", \"ol\", \"nl\", \"li\", \"b\", \"img\", \"i\", \"strong\", \"em\", \"strike\", \"code\", \"hr\", \"br\", \"div\", \"table\", \"thead\", \"caption\", \"tbody\", \"tr\", \"th\", \"td\", \"pre\" ]",
+    "allowedTags": "[ \"h1\", \"h2\", \"h3\", \"h4\", \"h5\", \"h6\", \"blockquote\", \"p\", \"a\", \"ul\", \"ol\", \"nl\", \"li\", \"b\", \"img\", \"i\", \"strong\", \"em\", \"strike\", \"code\", \"hr\", \"br\", \"div\", \"table\", \"thead\", \"caption\", \"tbody\", \"tr\", \"th\", \"td\", \"pre\" ]",
     "allowedAttributes": "{\"a\": [ \"href\", \"name\", \"target\" ], \"img\": [\"src\", \"class\", \"alt\", \"title\"] }",
     "selfClosing": "[ \"img\", \"br\", \"hr\", \"area\", \"base\",\"basefont\", \"input\", \"link\", \"meta\" ]",
     "parseAgain": ""

@@ -18,7 +18,7 @@
 		    <input class="form-control" placeholder="leave blank or [ ] for none" type="text" name="allowedTags" id="allowedTags"/>
 			<p class="help-block">
 				if invalid entry, default is:
-				<pre>[ "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol", "nl", "li", "b", "img", "i", "strong", "em", "strike", "code", "hr", "br", "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre" ]</pre>
+				<pre>[ "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol", "nl", "li", "b", "img", "i", "strong", "em", "strike", "code", "hr", "br", "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre" ]</pre>
 			</p>
 		</div>
 
@@ -109,8 +109,20 @@
                  }
              });
 
-     		Settings.load(nbbId, wrapper, function() {
-                 wrapper.find("input[type='checkbox']").trigger("change");
+     		Settings.load(nbbId, wrapper, function(err, values) {
+                // backward compatible
+                var redeserialize = false;
+
+                // do that again because we want to force parseable values to re-become strings again.
+                ['allowedAttributes', 'allowedTags', 'selfClosing'].forEach(function(prop) {
+                    if (values[prop] && typeof values[prop] != 'string') {
+                       redeserialize = true;
+                       values[prop] = JSON.stringify(values[prop]);
+                    }
+                });
+				redeserialize && wrapper.deserialize(values);
+
+                wrapper.find("input[type='checkbox']").trigger("change");
      		});
 
      		wrapper.find("#save").on("click", function(e) {
