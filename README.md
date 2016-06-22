@@ -8,7 +8,7 @@ if you're using [nodebb-plugin-markdown](https://github.com/julianlam/nodebb-plu
 ### Settings
 ![Imgur](http://i.imgur.com/4VU8SSB.png)
 
-### Don't forget to shut off Markdown's HTML Sanitize
+### Don't forget check the Allow Html in Plugins > Markdown
 ![Imgur](https://cloud.githubusercontent.com/assets/1398375/16253632/f1b0e1e2-3805-11e6-90ae-e762c80059e4.png)
 
 
