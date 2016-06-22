@@ -7,10 +7,10 @@
   "templates": "./public/templates",
   "hooks": [
     {"hook": "static:app.load", "method": "onLoad"},
-    {"hook": "filter:parse.post", "method": "sanitizePost", "priority": 6},
-    {"hook": "filter:parse.signature", "method": "sanitizeSignature", "priority": 6},
-    {"hook": "filter:parse.raw", "method": "sanitizeRaw", "priority": 6},
-    {"hook": "filter:post.save", "method": "sanitizeSave", "priority": 6},
+    {"hook": "filter:parse.post", "method": "sanitizePost", "priority": 1},
+    {"hook": "filter:parse.signature", "method": "sanitizeSignature", "priority": 1},
+    {"hook": "filter:parse.raw", "method": "sanitizeRaw", "priority": 1},
+    {"hook": "filter:post.save", "method": "sanitizeSave", "priority": 1},
     {"hook": "filter:composer.help", "method": "renderHelp"},
     {"hook": "filter:admin.header.build", "method": "admin.menu"}
   ],
