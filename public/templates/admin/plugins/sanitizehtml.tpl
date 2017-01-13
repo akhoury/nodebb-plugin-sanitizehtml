@@ -32,7 +32,7 @@
 			<input class="form-control" placeholder="leave blank or { } for none" type="text" name="allowedAttributes" id="allowedAttributes" />
 			<p class="help-block">
 				if invalid entry, default is:
-				<pre>{"a": [ "href", "name", "target" ], "img": ["src", "class", "alt", "title"] }</pre>
+				<pre>{"a": [ "href", "name", "target" ], "img": ["data-*", "src", "class", "alt", "title"] }</pre>
 			</p>
 		</div>
 
