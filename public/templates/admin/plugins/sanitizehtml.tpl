@@ -1,55 +1,70 @@
 <h1><i class="fa {faIcon}"></i> {name}</h1>
 
 <h3>Options (still shy)</h3>
- <p>
- 	These raw options are strictly the <a href="https://github.com/punkave/sanitize-html" target="_blank">sanitize-html</a> module options.
- 	At this early version, these options must be entered as <b>valid</b> JSON values, <b>non-valid</b> JSON will be ignored and fall back to defaults below.
- 	 I will make this more user friendly as soon as I get a chance.
- </p>
+    <p>
+        These raw options are strictly the <a href="https://github.com/punkave/sanitize-html" target="_blank">sanitize-html</a> module options.
+        At this early version, these options must be entered as <b>valid</b> JSON values, <b>non-valid</b> JSON will be ignored and fall back to defaults below.
+        I will make this more user friendly as soon as I get a chance.
+    </p>
 <form role="form" class="{nbbId}-settings form">
 
 <br />
 <br />
 
-	    <div class="form-group">
-			<label for="allowedTags">
-				This is an <i>Array</i> of allowed tags
-			</label>
-		    <input class="form-control" placeholder="leave blank or [ ] for none" type="text" name="allowedTags" id="allowedTags"/>
-			<p class="help-block">
-				if invalid entry, default is:
-				<pre>[ "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol", "nl", "li", "b", "img", "i", "strong", "em", "strike", "code", "hr", "br", "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre" ]</pre>
-			</p>
-		</div>
+   <div class="form-group">
+       <label for="allowedTags">
+           This is an <i>Array</i> of allowed tags
+       </label>
+       <input class="form-control" placeholder="leave blank or [ ] for none" type="text" name="allowedTags" id="allowedTags"/>
+       <p class="help-block">
+           if invalid entry, default is:
+           <pre>[ "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol", "nl", "li", "b", "img", "i", "strong", "em", "strike", "code", "hr", "br", "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre" ]</pre>
+       </p>
+   </div>
 
 <br />
 <br />
 
-		<div class="form-group">
-			<label for="allowedAttributes">
-				This is an <i>Object</i> of allowed attributes of each each allowed tags
-			</label>
-			<input class="form-control" placeholder="leave blank or { } for none" type="text" name="allowedAttributes" id="allowedAttributes" />
-			<p class="help-block">
-				if invalid entry, default is:
-				<pre>{"a": [ "href", "name", "target" ], "img": ["data-*", "src", "class", "alt", "title"] }</pre>
-			</p>
-		</div>
+    <div class="form-group">
+        <label for="allowedAttributes">
+            This is an <i>Object</i> of allowed attributes of each each allowed tags
+        </label>
+        <input class="form-control" placeholder="leave blank or { } for none" type="text" name="allowedAttributes" id="allowedAttributes" />
+        <p class="help-block">
+            if invalid entry, default is:
+            <pre>{"a": [ "href", "name", "target" ], "img": ["data-*", "src", "class", "alt", "title"] }</pre>
+        </p>
+    </div>
 
 <br />
 <br />
 
-		<div class="form-group">
+    <div class="form-group">
 
-			<label for="selfClosing">
-				This is an <i>Array</i> of self closing option of each allowed tag
-			</label>
-			<input class="form-control" placeholder="leave blank or [ ] for none" type="text" name="selfClosing" id="selfClosing" />
-			<p class="help-block">
-				if invalid entry, default is:
-				<pre>[ "img", "br", "hr", "area", "base","basefont", "input", "link", "meta" ]</pre>
-			</p>
-		</div>
+        <label for="selfClosing">
+            This is an <i>Array</i> of self closing option of each allowed tag
+        </label>
+        <input class="form-control" placeholder="leave blank or [ ] for none" type="text" name="selfClosing" id="selfClosing" />
+        <p class="help-block">
+            if invalid entry, default is:
+            <pre>[ "img", "br", "hr", "area", "base","basefont", "input", "link", "meta" ]</pre>
+        </p>
+    </div>
+
+<br />
+<br />
+
+    <div class="form-group">
+
+        <label for="allowedUrls">
+            This is an <i>Array</i> of urls allowed as src in iframe tags when iframe tags are allowed
+        </label>
+        <input class="form-control" placeholder="leave blank or [ ] for none" type="text" name="allowedUrls" id="allowedUrls" />
+        <p class="help-block">
+            if invalid entry, default is:
+            <pre>[ "youtube.com", "vimeo.com", "twitch.tv" ]</pre>
+        </p>
+    </div>
 
 <br />
 <br />
@@ -94,51 +109,50 @@
 </form>
 
 <script type="text/javascript">
-	require(["settings"], function(Settings) {
-     		var nbbId = "{nbbId}",
-     		    klass = nbbId + "-settings";
-     		    wrapper = $("." + klass);
+    require(["settings"], function(Settings) {
+        var nbbId = "{nbbId}",
+            klass = nbbId + "-settings";
+            wrapper = $("." + klass);
 
-             wrapper.find("input[type='checkbox']").on("change", function(e) {
-                 var target = $(e.target),
-                     toggle = wrapper.find(target.attr("data-toggle-target"));
-                 if (target.is(":checked")) {
-                     toggle.removeClass("hidden");
-                 } else {
-                     toggle.addClass("hidden");
-                 }
-             });
+        wrapper.find("input[type='checkbox']").on("change", function(e) {
+            var target = $(e.target),
+                toggle = wrapper.find(target.attr("data-toggle-target"));
+            if (target.is(":checked")) {
+                toggle.removeClass("hidden");
+            } else {
+                toggle.addClass("hidden");
+            }
+        });
 
-     		Settings.load(nbbId, wrapper, function(err, values) {
-                // backward compatible
-                var redeserialize = false;
+        Settings.load(nbbId, wrapper, function(err, values) {
+            // backward compatible
+            var redeserialize = false;
 
-                // do that again because we want to force parseable values to re-become strings again.
-                ['allowedAttributes', 'allowedTags', 'selfClosing'].forEach(function(prop) {
-                    if (values[prop] && typeof values[prop] != 'string') {
-                       redeserialize = true;
-                       values[prop] = JSON.stringify(values[prop]);
+            // do that again because we want to force parseable values to re-become strings again.
+            ['allowedAttributes', 'allowedTags', 'selfClosing', 'allowedUrls'].forEach(function(prop) {
+                if (values[prop] && typeof values[prop] != 'string') {
+                    redeserialize = true;
+                    values[prop] = JSON.stringify(values[prop]);
+                }
+            });
+            redeserialize && wrapper.deserialize(values);
+
+            wrapper.find("input[type='checkbox']").trigger("change");
+        });
+
+        wrapper.find("#save").on("click", function(e) {
+            Settings.save(nbbId, wrapper, function() {
+                app.alert({
+                    type: 'success',
+                    alert_id: 'sanitizehtml-saved',
+                    title: 'Reload Required',
+                    message: 'Settings saved. Please reload your NodeBB to have your changes take effect',
+                    clickfn: function() {
+                        socket.emit('admin.reload');
                     }
                 });
-				redeserialize && wrapper.deserialize(values);
-
-                wrapper.find("input[type='checkbox']").trigger("change");
-     		});
-
-     		wrapper.find("#save").on("click", function(e) {
-                 Settings.save(nbbId, wrapper, function() {
-                        app.alert({
-                            type: 'success',
-                            alert_id: 'sanitizehtml-saved',
-                            title: 'Reload Required',
-                            message: 'Settings saved. Please reload your NodeBB to have your changes take effect',
-                            clickfn: function() {
-                                socket.emit('admin.reload');
-                            }
-                        });
-                 });
-     		});
-
-
-     	});
+            });
+        });
+    });
 </script>
+
