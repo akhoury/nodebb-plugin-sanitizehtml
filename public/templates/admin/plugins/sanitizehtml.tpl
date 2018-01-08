@@ -28,6 +28,11 @@
 		<div class="form-group">
 			<label for="allowedAttributes">
 				This is an <i>Object</i> of allowed attributes of each each allowed tags
+                *Note - if allowing an <i>iframe</i> tag with a <i>src</i> attribute you can add the allowable domains to the "allowedDomains" property as an <i>Array</i>
+                i.e.:
+                <code>
+                    "iframe": {"attributes": "src", "allowedDomains": ["youtube.com", "vimeo.com"]} 
+                </code>
 			</label>
 			<input class="form-control" placeholder="leave blank or { } for none" type="text" name="allowedAttributes" id="allowedAttributes" />
 			<p class="help-block">
@@ -54,6 +59,20 @@
 <br />
 <br />
 
+		<div class="form-group">
+
+			<label for="allowedDomains">
+				This is an <i>Array</i> of allowed domains as a src in iframe tags, very strict.
+			</label>
+		    <input class="form-control" placeholder="leave blank or [ ] for none" type="text" name="allowedDomains" id="allowedDomains" />
+            <p class="help-block">
+                if invalid entry, default is:
+                <pre>[ "www.youtube.com", "player.vimeo.com" ]</pre>
+            </p>
+		</div>
+
+<br />
+<br />
     <label for="advancedShown">
         <input id="advancedShown" name="advancedShown" type="checkbox" data-toggle-target="div[for='parseAgain']"/> Show Advanced Option
     </label>
@@ -114,7 +133,7 @@
                 var redeserialize = false;
 
                 // do that again because we want to force parseable values to re-become strings again.
-                ['allowedAttributes', 'allowedTags', 'selfClosing'].forEach(function(prop) {
+                ['allowedAttributes', 'allowedTags', 'selfClosing', 'allowedDomains'].forEach(function(prop) {
                     if (values[prop] && typeof values[prop] != 'string') {
                        redeserialize = true;
                        values[prop] = JSON.stringify(values[prop]);
