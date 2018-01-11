@@ -20,6 +20,6 @@
     "allowedAttributes": "{\"a\": [ \"href\", \"name\", \"target\" ], \"img\": [\"data-*\", \"src\", \"class\", \"alt\", \"title\"] }",
     "selfClosing": "[ \"img\", \"br\", \"hr\", \"area\", \"base\",\"basefont\", \"input\", \"link\", \"meta\" ]",
     "parseAgain": "",
-    "allowedDomains": "['www.youtube.com', 'player.vimeo.com']"
+    "allowedHostnames": "['www.youtube.com', 'player.vimeo.com']"
   }
 }
