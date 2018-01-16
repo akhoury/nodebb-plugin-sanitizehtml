@@ -1,4 +1,4 @@
-var	sanitizeHtml = require('/Users/ryan/Verys/sanitize-html'),
+var	sanitizeHtml = require('sanitize-html'),
 		fs = require('fs-extra'),
 		pluginData = require('./plugin.json'),
 		path = require('path'),
