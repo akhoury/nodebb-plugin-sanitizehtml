@@ -61,9 +61,9 @@
                 **Note if you want to allow iframes you need to make sure that <code>iframe</code> is added as an allowable tag
                 and that <code>"iframe": ["src"]</code> is added to allowable attributes.
 			</label>
-		    <input class="form-control" placeholder="leave blank or [ ] for none" type="text" name="allowedHostnames" id="allowedHostnames" />
+		    <input class="form-control" placeholder="enter [ ] for none" type="text" name="allowedHostnames" id="allowedHostnames" />
             <p class="help-block">
-                if invalid entry, default is:
+                if invalid entry or blank, default is:
                 <pre>[ "www.youtube.com", "player.vimeo.com" ]</pre>
             </p>
 		</div>
