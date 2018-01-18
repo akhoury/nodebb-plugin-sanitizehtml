@@ -57,7 +57,6 @@ Plugin = {
 	},
 
 	init: function(callback) {
-
 		// Load saved config
 		var defaults = pluginData.defaultSettings,
 				fields = Object.keys(defaults);

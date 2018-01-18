@@ -1,11 +1,11 @@
 <h1><i class="fa {faIcon}"></i> {name}</h1>
 
 <h3>Options (still shy)</h3>
- <p>
+<p>
  	These raw options are strictly the <a href="https://github.com/punkave/sanitize-html" target="_blank">sanitize-html</a> module options.
  	At this early version, these options must be entered as <b>valid</b> JSON values, <b>non-valid</b> JSON will be ignored and fall back to defaults below.
  	 I will make this more user friendly as soon as I get a chance.
- </p>
+</p>
 <form role="form" class="{nbbId}-settings form">
 
 <br />
@@ -54,6 +54,22 @@
 <br />
 <br />
 
+		<div class="form-group">
+
+			<label for="allowedHostnames">
+				This is an <i>Array</i> of allowed hostnames included in url as a src in iframe tags.
+                **Note if you want to allow iframes you need to make sure that <code>iframe</code> is added as an allowable tag
+                and that <code>"iframe": ["src"]</code> is added to allowable attributes.
+			</label>
+		    <input class="form-control" placeholder="enter [ ] for none" type="text" name="allowedHostnames" id="allowedHostnames" />
+            <p class="help-block">
+                if invalid entry or blank, default is:
+                <pre>[ "www.youtube.com", "player.vimeo.com" ]</pre>
+            </p>
+		</div>
+
+<br />
+<br />
     <label for="advancedShown">
         <input id="advancedShown" name="advancedShown" type="checkbox" data-toggle-target="div[for='parseAgain']"/> Show Advanced Option
     </label>
@@ -114,7 +130,7 @@
                 var redeserialize = false;
 
                 // do that again because we want to force parseable values to re-become strings again.
-                ['allowedAttributes', 'allowedTags', 'selfClosing'].forEach(function(prop) {
+                ['allowedAttributes', 'allowedTags', 'selfClosing', 'allowedHostnames'].forEach(function(prop) {
                     if (values[prop] && typeof values[prop] != 'string') {
                        redeserialize = true;
                        values[prop] = JSON.stringify(values[prop]);
