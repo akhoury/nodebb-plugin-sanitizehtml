@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-sanitizehtml",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "An HTML Sanitizer parser for NodeBB",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "url": "https://github.com/akhoury/nodebb-plugin-sanitizehtml/issues"
   },
   "nbbpm": {
-    "compatibility": ">0.6.0"
+    "compatibility": "^1.7.5"
   },
   "dependencies": {
     "async": "~0.2.9",

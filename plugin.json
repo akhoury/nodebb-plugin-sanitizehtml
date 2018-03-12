@@ -5,6 +5,9 @@
   "url": "https://github.com/akhoury/nodebb-plugin-sanitizehtml",
   "library": "./index.js",
   "templates": "./public/templates",
+  "staticDirs": {
+    "css": "public/css"
+  },
   "hooks": [
     {"hook": "static:app.load", "method": "onLoad"},
     {"hook": "filter:parse.post", "method": "sanitizePost", "priority": 1},
