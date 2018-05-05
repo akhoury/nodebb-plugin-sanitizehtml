@@ -56,14 +56,14 @@
 
 		<div class="form-group">
 
-			<label for="allowedHostnames">
+			<label for="allowedIframeHostnames">
 				This is an <i>Array</i> of allowed hostnames included in url as a src in iframe tags.
                 **Note if you want to allow iframes you need to make sure that <code>iframe</code> is added as an allowable tag
                 and that <code>"iframe": ["src"]</code> is added to allowable attributes.
 			</label>
-		    <input class="form-control" placeholder="enter [ ] for none" type="text" name="allowedHostnames" id="allowedHostnames" />
+		    <input class="form-control" placeholder="enter [ ] for none" type="text" name="allowedIframeHostnames" id="allowedIframeHostnames" />
             <p class="help-block">
-                if invalid entry or blank, default is:
+                If blank, no iframe domains will be allowed, if invalid entry, default is:
                 <pre>[ "www.youtube.com", "player.vimeo.com" ]</pre>
             </p>
 		</div>
@@ -130,7 +130,7 @@
                 var redeserialize = false;
 
                 // do that again because we want to force parseable values to re-become strings again.
-                ['allowedAttributes', 'allowedTags', 'selfClosing', 'allowedHostnames'].forEach(function(prop) {
+                ['allowedAttributes', 'allowedTags', 'selfClosing', 'allowedIframeHostnames'].forEach(function(prop) {
                     if (values[prop] && typeof values[prop] != 'string') {
                        redeserialize = true;
                        values[prop] = JSON.stringify(values[prop]);
