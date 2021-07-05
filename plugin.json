@@ -5,6 +5,7 @@
   "url": "https://github.com/akhoury/nodebb-plugin-sanitizehtml",
   "library": "./index.js",
   "templates": "./public/templates",
+  "settingsRoute": "/admin/plugins/sanitizehtml",
   "staticDirs": {
     "css": "public/css"
   },

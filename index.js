@@ -13,26 +13,12 @@ pluginData.nbbId = pluginData.id.replace(/nodebb-plugin-/, '');
 
 Plugin = {
 
-	settings: function(settings, callback) {
-		if (typeof settings === 'function') {
-			callback = settings;
-			settings = undefined;
-		}
-		if (typeof callback !== 'function') {
-			callback = function(){};
-		}
+	settings: async function(settings) {
 		if (settings) {
-			meta.settings.set(pluginData.nbbId, settings, callback);
+			await meta.settings.set(pluginData.nbbId, settings);
 		} else {
-			meta.settings.get(pluginData.nbbId, function(err, config) {
-				if (err) {
-					winston.warn('[plugins/' + pluginData.nbbId + '] Settings are not set or could not be retrieved!');
-					return callback(err);
-				}
-
-				Plugin.config = extend(true, {}, Plugin.config, config);
-				callback(null, config);
-			});
+			await meta.settings.get(pluginData.nbbId)
+			Plugin.config = extend(true, {}, Plugin.config, config);
 		}
 	},
 
@@ -42,7 +28,7 @@ Plugin = {
 		}
 	},
 
-	onLoad: function (params, callback) {
+	onLoad: async function (params) {
 
 		var app = params.router, middleware = params.middleware;
 
@@ -53,61 +39,55 @@ Plugin = {
 		app.get('/admin/plugins/' + pluginData.nbbId, middleware.applyCSRF, middleware.admin.buildHeader, render);
 		app.get('/api/admin/plugins/' + pluginData.nbbId, middleware.applyCSRF, render);
 
-		Plugin.init(callback);
+		await Plugin.init();
 	},
 
-	init: function(callback) {
+	init: async function() {
 		// Load saved config
-		var defaults = pluginData.defaultSettings,
-				fields = Object.keys(defaults);
+		const defaults = pluginData.defaultSettings;
+		const fields = Object.keys(defaults);
 
-		meta.settings.get(pluginData.nbbId, function (err, options) {
+		const options = await meta.settings.get(pluginData.nbbId)
 
-			fields.forEach(function(field, i) {
+		fields.forEach(function(field) {
+			const savedValue = options[field];
+			const defaultValue = defaults[field];
+			let obj;
 
-				var savedValue = options[field],
-						defaultValue = defaults[field],
-						obj;
+			if (field !== 'parseAgain') {
+				obj = !savedValue ? field === 'allowedAttributes' ? '{}' : '[]' : savedValue;
 
-				if (field !== 'parseAgain') {
-					obj = !savedValue ? field === 'allowedAttributes' ? '{}' : '[]' : savedValue;
-
-					if (obj && typeof obj == 'string') {
-						try {
-							obj = JSON.parse(obj);
-						} catch (e) {
-							winston.warn('[plugins/' + pluginData.nbbId + '] e1: ' + e + ' can\'t JSON.parse option: ' + field + ' value: ' + obj + ' falling back to default.');
-							obj = JSON.parse(defaultValue);
-						}
-					}
-				} else {
-					var noop = function (c) {
-						return c;
-					};
+				if (obj && typeof obj == 'string') {
 					try {
-						// Function.apply(context, args (csv string), function-code (string))
-						obj = Function.apply(Plugin, ['content, $', (savedValue ? savedValue : defaultValue) + '\nreturn content;' ]);
-
+						obj = JSON.parse(obj);
 					} catch (e) {
-						winston.warn('[plugins/' + pluginData.nbbId + '] e2: ' + e + ' can\'t parse function "' + field + '" falling back to noop.');
-						obj = noop;
-					}
-					// let's see if it doesn't crash
-					try {
-						obj("test", $, "1", "2", "3");
-					} catch (e) {
-						// if it did, then too bad, you had a good run, but no thanks
-						winston.warn('[plugins/' + pluginData.nbbId + '] e3: ' + e + ' | parseAgain code:[start] ' + obj + ' [end] has error, falling back to noop.');
-						obj = noop;
+						winston.warn('[plugins/' + pluginData.nbbId + '] e1: ' + e + ' can\'t JSON.parse option: ' + field + ' value: ' + obj + ' falling back to default.');
+						obj = JSON.parse(defaultValue);
 					}
 				}
+			} else {
+				var noop = function (c) {
+					return c;
+				};
+				try {
+					// Function.apply(context, args (csv string), function-code (string))
+					obj = Function.apply(Plugin, ['content, $', (savedValue ? savedValue : defaultValue) + '\nreturn content;' ]);
 
-				Plugin.config[field] = obj;
-			});
-
-			if (typeof callback === 'function') {
-				callback();
+				} catch (e) {
+					winston.warn('[plugins/' + pluginData.nbbId + '] e2: ' + e + ' can\'t parse function "' + field + '" falling back to noop.');
+					obj = noop;
+				}
+				// let's see if it doesn't crash
+				try {
+					obj("test", $, "1", "2", "3");
+				} catch (e) {
+					// if it did, then too bad, you had a good run, but no thanks
+					winston.warn('[plugins/' + pluginData.nbbId + '] e3: ' + e + ' | parseAgain code:[start] ' + obj + ' [end] has error, falling back to noop.');
+					obj = noop;
+				}
 			}
+
+			Plugin.config[field] = obj;
 		});
 	},
 
@@ -115,29 +95,29 @@ Plugin = {
 		return Plugin.config.parseAgain(sanitizeHtml(Plugin.unescapeHtml(content || ''), Plugin.config), $);
 	},
 
-	sanitizeSave: function (post, callback) {
+	sanitizeSave: function (post) {
 		if (post && post.content) {
 			post.content = Plugin.sanitize(post.content);
 		}
-		callback(null, post);
+		return post
 	},
 
-	sanitizePost: function (data, callback) {
+	sanitizePost: function (data) {
 		if (data && data.postData && data.postData.content) {
 			data.postData.content = Plugin.sanitize(data.postData.content);
 		}
-		callback(null, data);
+		return data
 	},
 
-	sanitizeRaw: function (raw, callback) {
-		callback(null, raw ? Plugin.sanitize(raw) : raw);
+	sanitizeRaw: function (raw) {
+		return raw ? Plugin.sanitize(raw) : raw
 	},
 
-	sanitizeSignature: function (data, callback) {
+	sanitizeSignature: function (data) {
 		if (data && data.userData && data.userData.signature) {
 			data.userData.signature = Plugin.sanitize(data.userData.signature);
 		}
-		callback(null, data);
+		return data
 	},
 
 	unescapeHtml: function (unsafe) {
@@ -149,7 +129,7 @@ Plugin = {
 				.replace(/&#039;/g, "'");
 	},
 
-	renderHelp: function (helpContent, callback) {
+	renderHelp: function (helpContent) {
 		helpContent += "<h2>Sanitized HTML</h2>"
 		+ "<p>You can still use safe HTML, provided by <a href='https://github.com/akhoury/nodebb-plugin-sanitizehtml'>nodebb-plugin-sanitizehtml</a></p>"
 		+ (function () {
@@ -187,16 +167,16 @@ Plugin = {
 		})()
 		+ "<p class='text-warning'>&nbsp;Eveything else will be sanitized</p>";
 
-		callback(null, helpContent);
+		return helpContent
 	},
 	admin: {
-		menu: function (custom_header, callback) {
+		menu: function (custom_header) {
 			custom_header.plugins.push({
 				"route": '/plugins/' + pluginData.nbbId,
 				"icon": pluginData.faIcon,
 				"name": pluginData.name
 			});
-			callback(null, custom_header);
+			return custom_header
 		},
 		activate: function (id) {
 			if (id === 'nodebb-plugin-' + pluginData.nbbId) {
