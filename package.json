@@ -28,7 +28,7 @@
     "compatibility": "^1.17.x"
   },
   "dependencies": {
-    "async": "~0.2.9",
+    "async": "~2.6.4",
     "extend": "^3.0.0",
     "fs-extra": "~0.8.1",
     "jquery": ">=2.1",
